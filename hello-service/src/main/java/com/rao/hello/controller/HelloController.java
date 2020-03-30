@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.serviceregistry.Registration;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @RestController
@@ -25,6 +25,9 @@ public class HelloController {
     @Autowired
     private Registration registration;
 
+    @Resource
+    private KafkaTemplate<String,Object> kafkaTemplate;
+
     @RequestMapping(value = "/hello",method = RequestMethod.GET)
     public  String index(){
         List<ServiceInstance> instances = client.getInstances(registration.getServiceId());
@@ -33,5 +36,11 @@ public class HelloController {
         }
 
         return "Hello World";
+    }
+
+    @GetMapping("/message/send")
+    public boolean send(@RequestParam("test") String message){
+        kafkaTemplate.send("test1",message);
+        return true;
     }
 }
